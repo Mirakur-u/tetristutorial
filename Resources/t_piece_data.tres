@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://c85275jkyq0su"]
+
+[ext_resource type="Script" path="res://Scripts/piece_data.gd" id="1_do0tn"]
+[ext_resource type="Texture2D" uid="uid://dautmyeyk126o" path="res://Assets/Purple.png" id="1_kvq40"]
+
+[resource]
+script = ExtResource("1_do0tn")
+piece_texture = ExtResource("1_kvq40")
+tetromino_type = 2
+spawn_position = Vector2(-24, -456)

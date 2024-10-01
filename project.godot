@@ -15,6 +15,16 @@ run/main_scene="res://Scenes/main.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://Assets/2116430.webp"
 
+[autoload]
+
+Shared="*res://Scripts/shared.gd"
+
+[display]
+
+window/size/viewport_width=324
+window/stretch/mode="canvas_items"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
+environment/defaults/default_clear_color=Color(0.018488, 0.0307825, 0.148892, 1)
