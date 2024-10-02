@@ -1,7 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://dy3hia4pq1ikd"]
+[gd_scene load_steps=6 format=3 uid="uid://dy3hia4pq1ikd"]
 
 [ext_resource type="Texture2D" uid="uid://b8ikypsilsa4t" path="res://Assets/Border.png" id="1_v0do1"]
 [ext_resource type="Texture2D" uid="uid://c8pghgidbx1g2" path="res://Assets/Grid.png" id="2_35bef"]
+[ext_resource type="Script" path="res://Scripts/piece_spawner.gd" id="3_1gx0n"]
+[ext_resource type="Script" path="res://Scripts/board.gd" id="4_3x8wx"]
+[ext_resource type="PackedScene" uid="uid://1285rg48l4at" path="res://Scenes/tetromino.tscn" id="5_csy0n"]
 
 [node name="main" type="Node"]
 
@@ -31,3 +34,10 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_35bef")
 stretch_mode = 1
+
+[node name="PieceSpawner" type="Node" parent="."]
+script = ExtResource("3_1gx0n")
+
+[node name="Board" type="Node" parent="."]
+script = ExtResource("4_3x8wx")
+tetromino_scene = ExtResource("5_csy0n")
