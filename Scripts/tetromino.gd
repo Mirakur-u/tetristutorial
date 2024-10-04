@@ -15,11 +15,15 @@ var wall_kicks
 var tetromino_data
 var is_next_piece
 var pieces = []
-var other_tetrominos: Array[Tetromino]= []
+var other_tetromino_pieces = []
 
 @onready var timer: Timer = $Timer
+@onready var piece_spawner: Node = $PieceSpawner
+@onready var ghost_tetromino
 
+@onready var line_scene = preload("res://Scenes/line.tscn")
 @onready var piece_scene = preload("res://Scenes/piece.tscn")
+@onready var ghost_tetromino_scene = preload("res://Scenes/ghost_tetromino.tscn")
 
 
 var tetromino_cells
@@ -37,6 +41,38 @@ func _ready() -> void:
 	if is_next_piece == false:
 		position = tetromino_data.spawn_position
 		wall_kicks = Shared.wall_kicks_i if tetromino_data.tetromino_type == Shared.Tetromino.I else Shared.wall_kicks_jlostz
+		ghost_tetromino = ghost_tetromino_scene.instantiate() as GhostTetromino
+		ghost_tetromino.tetromino_data = tetromino_data
+		get_tree().root.add_child.call_deferred(ghost_tetromino)
+		hard_drop_ghost.call_deferred()
+		
+	else:
+		timer.stop()
+		set_process_input(false)
+
+
+func hard_drop_ghost():
+	var final_hard_drop_position
+	var ghost_position_update = calculate_global_position(Vector2.DOWN, global_position)
+	
+	while ghost_position_update != null:
+		ghost_position_update = calculate_global_position(Vector2.DOWN, ghost_position_update)
+		if ghost_position_update != null:
+			final_hard_drop_position = ghost_position_update
+			
+	if final_hard_drop_position != null:
+		var children = get_children().filter(func (c): return c is Piece)
+		
+		var pieces_position = []
+		
+		for i in children.size():
+			var piece_position = children[i].position
+			pieces_position.append(piece_position)
+		
+		ghost_tetromino.set_ghost_tetromino(final_hard_drop_position, pieces_position)
+	return final_hard_drop_position
+
+
 
 func _input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("left"):
@@ -57,6 +93,8 @@ func move(direction:Vector2):
 	var new_position = calculate_global_position(direction, global_position)
 	if new_position:
 		global_position = new_position
+		if direction != Vector2.DOWN:
+			hard_drop_ghost.call_deferred()
 		return true
 	return false
 
@@ -76,12 +114,10 @@ func is_within_game_bounds(direction:Vector2, starting_global_position: Vector2)
 	return true
 
 func is_colliding_with_other_tetrominos(direction: Vector2, starting_global_position: Vector2):
-	for tetromino in other_tetrominos:
-		var tetromino_pieces = tetromino.pieces
-		for tetromino_piece in tetromino_pieces:
-			for piece in pieces:
-				if starting_global_position + piece.position + direction* piece.get_size().x == tetromino.global_position + tetromino_piece.position:
-					return true
+	for tetromino_piece in other_tetromino_pieces:
+		for piece in pieces:
+			if starting_global_position + piece.position + direction * piece.get_size() == tetromino_piece.global_position:
+				return true
 	return false
 
 func rotate_tetromino(direction: int):
@@ -96,6 +132,10 @@ func rotate_tetromino(direction: int):
 	if !test_wall_kicks(rotation_index, direction):
 		rotation_index = original_rotation_index
 		apply_rotation(-direction)
+		
+	
+	hard_drop_ghost.call_deferred()
+
 
 
 
@@ -149,6 +189,7 @@ func lock():
 	timer.stop()
 	lock_tetromino.emit(self)
 	set_process_input(false)
+	ghost_tetromino.queue_free()
 
 func _on_timer_timeout() -> void:
 	var should_lock = !move(Vector2.DOWN)
